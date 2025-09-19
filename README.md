@@ -1,189 +1,131 @@
-# 🚀 DoneDep - Autonomous Deployment Platform
+# DoneDep Frontend
 
-<div align="center">
+## 🚀 Autonomous Deployment Platform - Frontend Application
 
-![DoneDep Logo](https://img.shields.io/badge/DoneDep-Autonomous%20Deployment-blue?style=for-the-badge&logo=rocket)
-[![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](LICENSE)
-[![Status](https://img.shields.io/badge/Status-In%20Development-orange?style=for-the-badge)](https://github.com/imranbaloch11/DoneDep)
+This is the frontend application for DoneDep, providing a beautiful and intuitive interface for managing deployments, domains, payments, and email services.
 
-**The Future of Zero-DevOps Deployment**
+## ✨ Features
 
-</div>
+### Core Interface
+- **Dashboard**: Comprehensive deployment management
+- **Domain Management**: Search, register, and configure domains
+- **Payment Processing**: Stripe Connect integration for user payments
+- **Email Services**: Native email service management
+- **User Authentication**: Secure login with email verification
 
-## 🎯 Vision
+### Advanced Features
+- **Real-time Updates**: Live deployment status and analytics
+- **Responsive Design**: Mobile-first approach with Tailwind CSS
+- **Type Safety**: Full TypeScript integration with shared types
+- **Modern UI**: Beautiful components with Framer Motion animations
+- **Form Management**: React Hook Form for performant forms
 
-DoneDep is an autonomous deployment platform that revolutionizes how developers deploy applications. By integrating the best features from Vercel, Supabase, Railway, and Render into one unified native platform, DoneDep provides a seamless, zero-DevOps experience with deep Windsurf IDE integration.
+## 🏗️ Architecture
 
-## ✨ Key Features
+### Tech Stack
+- **Framework**: Next.js 14 with App Router
+- **Language**: TypeScript for type safety
+- **Styling**: Tailwind CSS with custom components
+- **State Management**: React Context API and hooks
+- **Forms**: React Hook Form with validation
+- **HTTP Client**: Axios with interceptors
+- **Animations**: Framer Motion
+- **Icons**: Lucide React
 
-### 🤖 Autonomous Deployment
-- **One-Click Deploy** from Windsurf IDE to production
-- **AI-Powered Infrastructure** provisioning and optimization
-- **Automatic Scaling** based on traffic and usage patterns
-- **Zero Configuration** required for most applications
+### Project Structure
+```
+src/
+├── components/        # Reusable UI components
+├── features/          # Feature-specific components
+│   ├── dealdeck-pro/  # Pro dashboard features
+│   └── dealdeck-user/ # User dashboard features
+├── pages/             # Next.js pages
+├── services/          # API service layers
+│   └── api/           # API client and endpoints
+├── hooks/             # Custom React hooks
+├── utils/             # Utility functions
+└── styles/            # Global styles
+```
 
-### 🏗️ Full-Stack Support
-- **Frontend Deployment** (React, Next.js, Vue, Angular)
-- **Backend Services** (Node.js, Python, Go, Docker containers)
-- **Database Provisioning** (PostgreSQL, MongoDB, Redis)
-- **Real-time Features** (WebSockets, Server-Sent Events)
-
-### 🌐 Global Infrastructure
-- **Multi-Cloud Support** (AWS, GCP, Azure)
-- **Edge Computing** for optimal performance
-- **Global CDN** with automatic optimization
-- **SSL/TLS** certificates and domain management
-
-### 📊 Advanced Monitoring
-- **Real-time Analytics** and performance metrics
-- **Error Tracking** and automated alerts
-- **Cost Optimization** with AI-driven recommendations
-- **Security Scanning** and compliance monitoring
-
-## 🛠️ Technology Stack
-
-### Core Platform
-- **Backend**: Node.js, Go microservices
-- **Frontend**: React, Next.js with TypeScript
-- **Database**: PostgreSQL, MongoDB, Redis
-- **Infrastructure**: Kubernetes, Docker, Terraform
-
-### AI & Automation
-- **Machine Learning**: TensorFlow, PyTorch for optimization
-- **Natural Language**: OpenAI API for intelligent assistance
-- **Automation**: Custom agents for deployment orchestration
-
-### DevOps & Cloud
-- **Container Orchestration**: Kubernetes with Istio service mesh
-- **CI/CD**: GitHub Actions, GitLab CI integration
-- **Monitoring**: Prometheus, Grafana, ELK stack
-- **Security**: HashiCorp Vault, automated security scanning
-
-## 🚀 Getting Started
+## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js 18+ and npm/yarn
-- Docker and Docker Compose
-- Kubernetes cluster (local or cloud)
-- Windsurf IDE (for optimal integration)
+- Node.js 18+
+- npm 8+
 
-### Quick Start
+### Installation
 ```bash
-# Clone the repository
-git clone https://github.com/imranbaloch11/DoneDep.git
-cd DoneDep
-
-# Install dependencies
 npm install
+```
 
-# Set up environment variables
-cp .env.example .env
+### Environment Setup
+```bash
+cp .env.example .env.local
+```
 
-# Start development environment
-docker-compose up -d
+Configure your environment variables:
+```env
+NEXT_PUBLIC_API_URL="http://localhost:3001/api"
+NEXT_PUBLIC_APP_URL="http://localhost:3000"
+```
 
-# Run the application
+### Development
+```bash
 npm run dev
 ```
 
-### Windsurf IDE Integration
-1. Install the DoneDep extension from Windsurf marketplace
-2. Connect your DoneDep account
-3. Right-click any project → "Deploy with DoneDep"
-4. Watch your application go live in seconds!
-
-## 📋 Project Structure
-
-```
-DoneDep/
-├── frontend/                 # React/Next.js dashboard
-│   ├── components/          # Reusable UI components
-│   ├── pages/              # Application pages
-│   └── services/           # API integration
-├── backend/                 # Node.js/Go microservices
-│   ├── api-gateway/        # Main API gateway
-│   ├── deployment-service/ # Deployment orchestration
-│   ├── monitoring-service/ # Analytics and monitoring
-│   └── ai-service/         # AI optimization engine
-├── infrastructure/          # Kubernetes manifests
-│   ├── charts/             # Helm charts
-│   ├── terraform/          # Infrastructure as code
-│   └── docker/             # Container definitions
-├── shared/                  # Shared types and utilities
-│   ├── types/              # TypeScript definitions
-│   └── validation/         # Schema validation
-└── docs/                   # Documentation
-    ├── api/                # API documentation
-    └── guides/             # User guides
+### Production Build
+```bash
+npm run build
+npm start
 ```
 
-## 🎯 Roadmap
+## 🔌 API Integration
 
-### Phase 1: MVP (Q1 2025)
-- [x] Project initialization and architecture
-- [ ] Basic deployment pipeline
-- [ ] Windsurf IDE integration
-- [ ] PostgreSQL database provisioning
-- [ ] Simple monitoring dashboard
+### Backend Connection
+- **API Base URL**: Configurable via environment variables
+- **Authentication**: JWT tokens with automatic refresh
+- **Error Handling**: Comprehensive error management with toast notifications
+- **Type Safety**: Shared TypeScript types with backend
 
-### Phase 2: Core Features (Q2 2025)
-- [ ] Multi-framework support
-- [ ] Real-time database subscriptions
-- [ ] Advanced monitoring and analytics
-- [ ] Team collaboration features
-- [ ] Custom domain management
+### Service Layers
+- `auth.ts` - Authentication and user management
+- `domainReseller.ts` - Domain search, registration, DNS management
+- `stripeConnect.ts` - Payment processing and account management
+- `nativeEmail.ts` - Email service, templates, and campaigns
 
-### Phase 3: AI & Automation (Q3 2025)
-- [ ] AI-powered cost optimization
-- [ ] Autonomous scaling algorithms
-- [ ] Intelligent error detection
-- [ ] Performance recommendations
-- [ ] Security vulnerability scanning
+## 🚀 Deployment
 
-### Phase 4: Enterprise (Q4 2025)
-- [ ] Multi-cloud deployment
-- [ ] Enterprise security features
-- [ ] White-label solutions
-- [ ] Advanced compliance tools
-- [ ] Custom integrations
+### Vercel (Recommended)
+```bash
+npm run build
+# Deploy to Vercel
+```
 
-## 🤝 Contributing
+### Docker
+```bash
+docker build -t donedep-frontend .
+docker run -p 3000:3000 donedep-frontend
+```
 
-We welcome contributions from the community! Please read our [Contributing Guide](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
+## 🔧 Configuration
 
-### Development Setup
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Make your changes
-4. Add tests for new functionality
-5. Commit your changes (`git commit -m 'feat: add amazing feature'`)
-6. Push to the branch (`git push origin feature/amazing-feature`)
-7. Open a Pull Request
+### Environment Variables
+- `NEXT_PUBLIC_API_URL`: Backend API URL
+- `NEXT_PUBLIC_APP_URL`: Frontend application URL
+- `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`: Stripe publishable key
 
-## 📄 License
+### Build Configuration
+- **TypeScript**: Strict mode enabled
+- **ESLint**: Code quality enforcement
+- **Prettier**: Code formatting
+- **Tailwind**: Utility-first CSS framework
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+## 🤝 Related Repositories
 
-## 🌟 Support
-
-- 📧 **Email**: agentxdeck@gmail.com
-- 🌐 **Website**: [dealdeck.online](https://dealdeck.online)
-- 💬 **Discord**: Join our community server
-- 📖 **Documentation**: [docs.donedep.com](https://docs.donedep.com)
-
-## 🏆 Acknowledgments
-
-- Inspired by the excellent work of Vercel, Supabase, Railway, and Render
-- Built with love for the developer community
-- Special thanks to the Windsurf team for IDE integration support
+- **Backend**: [DonedepBackend](https://github.com/imranbaloch11/DonedepBackend)
+- **Shared Types**: Included in backend repository
 
 ---
 
-<div align="center">
-
-**"Deploying the future, one commit at a time"** 🚀
-
-[![GitHub Stars](https://img.shields.io/github/stars/imranbaloch11/DoneDep?style=social)](https://github.com/imranbaloch11/DoneDep/stargazers)
-[![GitHub Forks](https://img.shields.io/github/forks/imranbaloch11/DoneDep?style=social)](https://github.com/imranbaloch11/DoneDep/network/members)
-
-</div>
+**Part of the DoneDep Platform** - Autonomous deployment made simple.
