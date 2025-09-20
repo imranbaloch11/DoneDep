@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { agentApi } from '@/services/api/agent';
+import { deployAgentAPI } from '@/services/api/deployagent';
 import { githubApi } from '@/services/api/github';
 import { domainApi } from '@/services/api/domain';
 import { infrastructureApi } from '@/services/api/infrastructure';
@@ -25,7 +25,7 @@ interface DeploymentBlock {
   id: string;
   type: 'frontend' | 'backend' | 'database' | 'domain' | 'email' | 'cicd' | 'monitoring' | 'container';
   name: string;
-  status: 'pending' | 'connecting' | 'connected' | 'failed';
+  status: 'pending' | 'connecting' | 'connected' | 'failed' | 'completed' | 'in-progress';
   details?: string;
   connections?: string[];
 }
@@ -56,7 +56,7 @@ const VisualDeploymentInterface: React.FC = () => {
     {
       id: '1',
       type: 'agent',
-      content: "Hi! I'm your DoneDep deployment assistant. Let's get your project deployed! First, let's connect your GitHub repositories.",
+      content: "Hi! I'm your intelligent deployment assistant. Let's get your project deployed! First, let's connect your GitHub repositories.",
       timestamp: new Date(),
       actions: [
         { label: 'Connect GitHub', action: 'connect_github', variant: 'primary' },
@@ -66,7 +66,52 @@ const VisualDeploymentInterface: React.FC = () => {
   ]);
 
   const [userInput, setUserInput] = useState('');
+  const [inputMessage, setInputMessage] = useState('');
+  const [isGitHubConnected, setIsGitHubConnected] = useState(false);
+  const [selectedRepo, setSelectedRepo] = useState('');
+  const [repositories, setRepositories] = useState<any[]>([]);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
+  const [sessionId, setSessionId] = useState<string>('');
+  const [contextId, setContextId] = useState<string | undefined>();
+
+  useEffect(() => {
+    // Initialize AI assistant session
+    const initializeSession = async () => {
+      try {
+        const result = await deployAgentAPI.initializeChat();
+        const { sessionId: newSessionId } = result;
+        setSessionId(newSessionId);
+      } catch (error) {
+        console.error('Failed to initialize AI assistant:', error);
+      }
+    };
+    
+    initializeSession();
+  }, []);
+
+  const handleBlockClick = (block: DeploymentBlock) => {
+    console.log('Block clicked:', block);
+  };
+
+  const handleConnectGitHub = () => {
+    setIsGitHubConnected(true);
+    setRepositories([
+      { id: 1, name: 'my-app', language: 'React' },
+      { id: 2, name: 'backend-api', language: 'Node.js' }
+    ]);
+  };
+
+  const handleAnalyzeProject = () => {
+    setIsAnalyzing(true);
+    setTimeout(() => setIsAnalyzing(false), 2000);
+  };
+
+  const handleSendMessage = () => {
+    if (!inputMessage.trim()) return;
+    handleUserMessage();
+    setInputMessage('');
+  };
 
   const getBlockIcon = (type: string) => {
     const iconClass = "h-8 w-8";
@@ -448,38 +493,49 @@ Now let's set up your database. What type of data will your app store?`,
           .map(block => ({ type: block.id, name: block.details })),
       };
 
-      // Call real OpenAI API through backend
-      const response = await agentApi.chat({
-        message: userInput,
-        conversationHistory: messages,
-        deploymentContext,
-      });
+      // Call AI assistant API through backend
+      const response = await deployAgentAPI.sendMessage(
+        userInput,
+        sessionId || 'default-session',
+        contextId
+      );
 
-      if (response.success && response.data) {
-        const agentResponse: AgentMessage = {
-          id: (Date.now() + 1).toString(),
-          type: 'agent',
-          content: response.data.response,
-          timestamp: new Date(),
-          actions: response.data.actions.map(action => ({
-            label: action.label,
-            action: action.action,
-            variant: action.variant as 'primary' | 'secondary'
-          }))
-        };
+      const agentResponse: AgentMessage = {
+        id: (Date.now() + 1).toString(),
+        type: 'agent',
+        content: response.message,
+        timestamp: new Date(),
+        actions: response.actions?.map((action: any) => ({
+          label: action.content || 'Execute',
+          action: action.type || 'execute',
+          variant: 'primary' as 'primary' | 'secondary'
+        })) || []
+      };
 
-        setMessages(prev => [...prev, agentResponse]);
-      } else {
-        throw new Error(response.message || 'Failed to get agent response');
+      setMessages(prev => [...prev, agentResponse]);
+      
+      // Update context if provided
+      if (response.contextId) {
+        setContextId(response.contextId);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Agent chat error:', error);
+      
+      // Enhanced error logging
+      if (error.response) {
+        console.error('Response status:', error.response.status);
+        console.error('Response data:', error.response.data);
+      } else if (error.request) {
+        console.error('No response received:', error.request);
+      } else {
+        console.error('Request setup error:', error.message);
+      }
       
       // Fallback response
       const fallbackResponse: AgentMessage = {
         id: (Date.now() + 1).toString(),
         type: 'agent',
-        content: "I'm having trouble connecting to my AI brain right now, but I can still help you! Let me know what specific deployment step you'd like to work on.",
+        content: "I'm having trouble connecting right now, but I can still help you! Let me know what specific deployment step you'd like to work on.",
         timestamp: new Date(),
         actions: [
           { label: 'Connect GitHub', action: 'connect_github', variant: 'primary' },
@@ -490,133 +546,204 @@ Now let's set up your database. What type of data will your app store?`,
 
       setMessages(prev => [...prev, fallbackResponse]);
     }
-
-    setIsTyping(false);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+      <div className="max-w-6xl mx-auto">
+        <div className="text-center mb-4">
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">
             🚀 Agentic Deployment Interface
           </h1>
-          <p className="text-gray-600">
+          <p className="text-lg text-gray-600">
             Visual deployment with AI-powered guidance
           </p>
         </div>
 
-        {/* Visual Blocks Section */}
-        <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
-          <h2 className="text-xl font-semibold text-gray-800 mb-6 flex items-center">
-            <CubeIcon className="h-6 w-6 mr-2 text-blue-600" />
-            Deployment Architecture
-          </h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-6">
-            {blocks.map((block, index) => (
-              <motion.div
-                key={block.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                className={getBlockStyles(block.status)}
-              >
-                <div className="flex flex-col items-center text-center">
-                  <div className="text-blue-600 mb-3">
-                    {getBlockIcon(block.type)}
-                  </div>
-                  <h3 className="font-medium text-gray-900 mb-1">
-                    {block.name}
-                  </h3>
-                  {block.details && (
-                    <p className="text-xs text-gray-500 mb-2">
-                      {block.details}
-                    </p>
-                  )}
-                  <div className="flex items-center justify-center">
-                    {getStatusIcon(block.status)}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {/* Deployment Blocks */}
+          <div className="space-y-4">
+            <div>
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">Deployment Architecture</h2>
+              <div className="grid grid-cols-3 gap-3">
+                {blocks.map((block) => (
+                  <motion.div
+                    key={block.id}
+                    className={`p-4 rounded-xl border-2 cursor-pointer transition-all duration-300 ${
+                      block.status === 'completed'
+                        ? 'bg-green-100 border-green-300 shadow-md'
+                        : block.status === 'in-progress'
+                        ? 'bg-blue-100 border-blue-300 shadow-md'
+                        : 'bg-white border-gray-200 hover:border-gray-300'
+                    }`}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => handleBlockClick(block)}
+                  >
+                    <div className="text-center">
+                      <div className="text-2xl mb-2">
+                        {getBlockIcon(block.type)}
+                      </div>
+                      <h3 className="font-medium text-gray-900 text-sm">{block.name}</h3>
+                      <p className={`text-xs mt-1 ${
+                        block.status === 'completed'
+                          ? 'text-green-600'
+                          : block.status === 'in-progress'
+                          ? 'text-blue-600'
+                          : 'text-gray-500'
+                      }`}>
+                        {block.status === 'completed' ? 'Ready' : 
+                         block.status === 'in-progress' ? 'Setting up...' : 'Not configured'}
+                      </p>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+
+            {/* GitHub Connection */}
+            <div className="bg-white rounded-xl shadow-sm border p-4">
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">Repository Connection</h3>
+              {!isGitHubConnected ? (
+                <div className="text-center py-4">
+                  <p className="text-gray-600 mb-4 text-sm">
+                    Hi! I'm your intelligent deployment assistant. Let's get your project deployed! First, let's connect your GitHub repositories.
+                  </p>
+                  <div className="flex justify-center space-x-3">
+                    <button
+                      onClick={handleConnectGitHub}
+                      className="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors text-sm"
+                    >
+                      Connect GitHub
+                    </button>
+                    <button
+                      onClick={() => setIsGitHubConnected(true)}
+                      className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors text-sm"
+                    >
+                      Skip for now
+                    </button>
                   </div>
                 </div>
-                
-                {/* Connection Lines */}
-                {index < blocks.length - 1 && (
-                  <div className="hidden lg:block absolute -right-3 top-1/2 transform -translate-y-1/2">
-                    <ArrowRightIcon className="h-4 w-4 text-gray-300" />
+              ) : (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-green-600 font-medium text-sm">✓ GitHub Connected</span>
+                    <button
+                      onClick={() => setIsGitHubConnected(false)}
+                      className="text-gray-500 hover:text-gray-700 text-sm"
+                    >
+                      Disconnect
+                    </button>
                   </div>
-                )}
-              </motion.div>
-            ))}
-          </div>
-        </div>
-
-        {/* Agent Chat Section */}
-        <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-4">
-            <h2 className="text-xl font-semibold text-white flex items-center">
-              🤖 DoneDep Deployment Assistant
-              {isTyping && (
-                <span className="ml-3 text-sm text-blue-100">typing...</span>
+                  
+                  <select 
+                    value={selectedRepo}
+                    onChange={(e) => setSelectedRepo(e.target.value)}
+                    className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                  >
+                    <option value="">Select a repository...</option>
+                    {repositories.map((repo) => (
+                      <option key={repo.id} value={repo.name}>
+                        {repo.name} ({repo.language})
+                      </option>
+                    ))}
+                  </select>
+                  
+                  {selectedRepo && (
+                    <button
+                      onClick={handleAnalyzeProject}
+                      disabled={isAnalyzing}
+                      className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 text-sm"
+                    >
+                      {isAnalyzing ? 'Analyzing...' : 'Analyze Project'}
+                    </button>
+                  )}
+                </div>
               )}
-            </h2>
+            </div>
           </div>
 
-          {/* Messages */}
-          <div className="h-96 overflow-y-auto p-6 space-y-4">
-            <AnimatePresence>
-              {messages.map((message) => (
+          {/* Agent Chat Section */}
+          <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+            <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-4">
+              <h2 className="text-xl font-semibold text-white flex items-center">
+                🤖 DoneDep Deployment Assistant
+                {isTyping && (
+                  <span className="ml-3 text-sm text-blue-100">typing...</span>
+                )}
+              </h2>
+            </div>
+
+            {/* Messages */}
+            <div className="h-80 overflow-y-auto p-4 space-y-3">
+              <AnimatePresence>
+                {messages.map((message) => (
+                  <motion.div
+                    key={message.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
+                  >
+                    <div className={`max-w-sm p-3 rounded-lg ${
+                      message.type === 'user' 
+                        ? 'bg-blue-600 text-white' 
+                        : 'bg-gray-100 text-gray-900'
+                    }`}>
+                      <p className="whitespace-pre-line text-sm">{message.content}</p>
+                      
+                      {message.actions && (
+                        <div className="mt-2 flex flex-wrap gap-1">
+                          {message.actions.map((action, index) => (
+                            <button
+                              key={index}
+                              onClick={() => handleAction(action.action)}
+                              className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
+                                action.variant === 'primary'
+                                  ? 'bg-blue-600 text-white hover:bg-blue-700'
+                                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                              }`}
+                            >
+                              {action.label}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+              
+              {isTyping && (
                 <motion.div
-                  key={message.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  className="flex justify-start"
                 >
-                  <div className={`max-w-md p-4 rounded-lg ${
-                    message.type === 'user' 
-                      ? 'bg-blue-600 text-white' 
-                      : 'bg-gray-100 text-gray-900'
-                  }`}>
-                    <p className="whitespace-pre-line">{message.content}</p>
-                    
-                    {message.actions && (
-                      <div className="mt-3 flex flex-wrap gap-2">
-                        {message.actions.map((action, index) => (
-                          <button
-                            key={index}
-                            onClick={() => handleAction(action.action)}
-                            className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
-                              action.variant === 'primary'
-                                ? 'bg-blue-600 text-white hover:bg-blue-700'
-                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                            }`}
-                          >
-                            {action.label}
-                          </button>
-                        ))}
-                      </div>
-                    )}
+                  <div className="bg-gray-100 p-3 rounded-lg">
+                    <div className="flex space-x-1">
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                      <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                    </div>
                   </div>
                 </motion.div>
-              ))}
-            </AnimatePresence>
-          </div>
+              )}
+            </div>
 
-          {/* Input */}
-          <div className="border-t p-4">
-            <div className="flex space-x-3">
+            {/* Input */}
+            <div className="flex items-center space-x-3 p-3 border-t bg-gray-50">
               <input
                 type="text"
-                value={userInput}
-                onChange={(e) => setUserInput(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleUserMessage()}
-                placeholder="Ask me anything about your deployment..."
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                value={inputMessage}
+                onChange={(e) => setInputMessage(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                placeholder="Ask about deployment, infrastructure, or get help..."
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
               />
               <button
-                onClick={handleUserMessage}
-                disabled={!userInput.trim() || isTyping}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                onClick={handleSendMessage}
+                disabled={!inputMessage.trim() || isTyping}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 text-sm"
               >
                 Send
               </button>
