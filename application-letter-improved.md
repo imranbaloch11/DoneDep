@@ -1,0 +1,15 @@
+I am writing to express my sincere enthusiasm for joining Concordia University's Bachelor of Computer Science program, specializing in Software Engineering. As a mature applicant, a full-time father of three, and a professional with nearly two decades in IT—including five years dedicated to DevOps—I bring both practical expertise and a deep determination to formalize my education in order to build a stable, impactful future for my family.
+
+Throughout my career, I have been passionate about designing reliable systems and automating complex workflows. In my recent DevOps role, I built and maintained cloud infrastructure on AWS, implemented containerized deployments using Docker and Kubernetes, and streamlined CI/CD pipelines with Jenkins, Terraform, and Ansible to accelerate delivery without compromising quality.
+
+Beyond my professional experience, I have independently developed comprehensive software projects that demonstrate my commitment to continuous learning. Currently, I am architecting DoneDep, an autonomous deployment platform that integrates domain management, payment processing, and email services. The system features an Express.js API server with TypeScript, PostgreSQL database with Prisma ORM, and Next.js frontend with React and Tailwind CSS, designed with containerized architecture ready for Kubernetes deployment. Additionally, I developed DealDeck, a business management platform with microservices architecture, JWT-based authentication, and comprehensive security following OWASP guidelines.
+
+These projects demonstrate my proficiency with modern software engineering practices including scalable architecture patterns, secure authentication flows, comprehensive testing strategies with Jest and Cypress, and code quality maintenance through TypeScript and ESLint. These experiences have provided me with a robust foundation in modern software practices, yet have also revealed gaps that would be best addressed through rigorous academic training.
+
+My journey has not been without challenges. As a protected person who fled persecution, I previously lacked access to all my academic records, which delayed my studies. I have now obtained the necessary documentation and am ready to dedicate myself fully to Concordia's program. Balancing single parenthood and professional growth has strengthened my discipline, empathy, and problem-solving abilities—qualities I will bring to the Concordia community.
+
+I am particularly drawn to Concordia's reputation for innovation and practical learning, which perfectly complements my hands-on experience. By combining my self-taught full-stack development skills, existing DevOps expertise, and formal studies in Software Engineering, I aim to contribute to cutting-edge projects and ultimately design scalable, ethical, and efficient solutions that serve both industry and society.
+
+Thank you for considering my application. I look forward to the opportunity to join Concordia's vibrant academic community and to prove, through dedication and hard work, that I can excel as a Software Engineering student and future industry professional.
+
+Warm regards,

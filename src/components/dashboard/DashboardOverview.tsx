@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { 
   CloudIcon,
   GlobeAltIcon,
-  DatabaseIcon,
+  CircleStackIcon as DatabaseIcon,
   EnvelopeIcon,
   PlusIcon,
   ArrowTrendingUpIcon,

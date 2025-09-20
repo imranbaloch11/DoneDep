@@ -24,8 +24,11 @@ export default function LoginPage() {
     setIsLoading(true);
     
     try {
+      console.log('Login attempt:', { email, password: '***' });
       await login(email, password);
+      console.log('Login successful, should redirect now');
     } catch (error) {
+      console.error('Login error:', error);
       // Error is handled by the auth context
     } finally {
       setIsLoading(false);

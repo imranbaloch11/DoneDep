@@ -2,7 +2,23 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
-import { User, AuthResponse } from '@donedep/shared';
+// Temporary type definitions until shared types are properly configured
+interface User {
+  id: string;
+  email: string;
+  name: string;
+  isEmailVerified: boolean;
+}
+
+interface AuthResponse {
+  success: boolean;
+  message?: string;
+  data?: {
+    token: string;
+    refreshToken?: string;
+    user: User;
+  };
+}
 import { authApi } from '@/services/api/auth';
 import { tokenStorage } from '@/utils/tokenStorage';
 import toast from 'react-hot-toast';
@@ -50,20 +66,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (email: string, password: string) => {
     try {
+      console.log('AuthContext: Starting login process');
       const response = await authApi.login({ email, password });
+      console.log('AuthContext: API response:', response);
       
-      if (response.success && response.user && response.token) {
-        setUser(response.user);
-        tokenStorage.setAccessToken(response.token);
-        if (response.refreshToken) {
-          tokenStorage.setRefreshToken(response.refreshToken);
+      if (response.success && response.data && response.data.user && response.data.token) {
+        console.log('AuthContext: Setting user and token');
+        setUser(response.data.user);
+        tokenStorage.setAccessToken(response.data.token);
+        if (response.data.refreshToken) {
+          tokenStorage.setRefreshToken(response.data.refreshToken);
         }
-        toast.success('Welcome back!');
-        router.push('/dashboard');
+        toast.success('Login successful!');
+        
+        console.log('AuthContext: Redirecting to dashboard');
+        // Force navigation to dashboard
+        setTimeout(() => {
+          console.log('AuthContext: Executing redirect');
+          window.location.href = '/dashboard';
+        }, 500);
       } else {
         throw new Error(response.message || 'Login failed');
       }
     } catch (error: any) {
+      console.error('AuthContext: Login error:', error);
       const message = error.response?.data?.message || error.message || 'Login failed';
       toast.error(message);
       throw error;

@@ -17,44 +17,62 @@ import toast from 'react-hot-toast';
 export default function VerifyEmailPage() {
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
   const [message, setMessage] = useState('');
+  const [hasVerified, setHasVerified] = useState(false);
   const searchParams = useSearchParams();
   const router = useRouter();
   const token = searchParams.get('token');
 
   useEffect(() => {
     const verifyEmail = async () => {
-      if (!token) {
-        setStatus('error');
-        setMessage('Invalid verification link. Please check your email for the correct link.');
+      if (!token || hasVerified) {
+        if (!token) {
+          setStatus('error');
+          setMessage('Invalid verification link. Please check your email for the correct link.');
+        }
         return;
       }
 
+      setHasVerified(true);
+
       try {
-        const response = await authApi.verifyEmail(token);
+        // Make direct fetch request to avoid any axios interceptor issues
+        const response = await fetch(`http://localhost:3001/api/auth/verify-email?token=${token}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
         
-        if (response.success) {
+        const data = await response.json();
+        
+        if (data.success) {
           setStatus('success');
-          setMessage('Your email has been verified successfully! You can now sign in to your account.');
+          setMessage('Your email has been verified successfully! Redirecting to your dashboard...');
           toast.success('Email verified successfully!');
           
-          // Redirect to login after 3 seconds
+          // Store the JWT token from verification response
+          if (data.data?.token) {
+            localStorage.setItem('accessToken', data.data.token);
+          }
+          
+          // Redirect to dashboard directly since user is now authenticated
           setTimeout(() => {
-            router.push('/login?message=Email verified successfully. You can now sign in.');
-          }, 3000);
+            router.push('/dashboard');
+          }, 2000);
         } else {
           setStatus('error');
-          setMessage(response.message || 'Email verification failed. Please try again.');
+          setMessage(data.message || 'Email verification failed. Please try again.');
         }
       } catch (error: any) {
         setStatus('error');
-        const errorMessage = error.response?.data?.message || 'Email verification failed. The link may be expired or invalid.';
+        const errorMessage = 'Email verification failed. The link may be expired or invalid.';
         setMessage(errorMessage);
         toast.error(errorMessage);
       }
     };
 
     verifyEmail();
-  }, [token, router]);
+  }, [token, router, hasVerified]);
 
   const handleResendVerification = async () => {
     // This would need to be implemented - redirect to a resend verification page
@@ -107,12 +125,12 @@ export default function VerifyEmailPage() {
               </p>
               <div className="space-y-3">
                 <Button asChild className="w-full">
-                  <Link href="/login">
-                    Sign In to Your Account
+                  <Link href="/dashboard">
+                    Go to Dashboard
                   </Link>
                 </Button>
                 <p className="text-sm text-gray-500">
-                  Redirecting you to sign in page in a few seconds...
+                  Redirecting you to dashboard in a few seconds...
                 </p>
               </div>
             </div>

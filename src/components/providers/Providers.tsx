@@ -1,6 +1,6 @@
 'use client';
 
-import { QueryClient, QueryClientProvider } from 'react-query';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { useState } from 'react';
@@ -12,7 +12,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
         defaultOptions: {
           queries: {
             staleTime: 60 * 1000, // 1 minute
-            cacheTime: 5 * 60 * 1000, // 5 minutes
+            gcTime: 5 * 60 * 1000, // 5 minutes (renamed from cacheTime)
             retry: (failureCount, error: any) => {
               if (error?.response?.status === 401) return false;
               return failureCount < 3;

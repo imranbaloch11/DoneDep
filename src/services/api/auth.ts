@@ -1,11 +1,39 @@
 import { apiClient } from './client';
-import { 
-  LoginRequest, 
-  RegisterRequest, 
-  AuthResponse, 
-  ApiResponse,
-  User 
-} from '@donedep/shared';
+
+// Temporary type definitions until shared types are properly configured
+interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+interface RegisterRequest {
+  email: string;
+  password: string;
+  name: string;
+}
+
+interface User {
+  id: string;
+  email: string;
+  name: string;
+  isEmailVerified: boolean;
+}
+
+interface AuthResponse {
+  success: boolean;
+  message?: string;
+  data?: {
+    token?: string;
+    refreshToken?: string;
+    user?: User;
+  };
+}
+
+interface ApiResponse<T = any> {
+  success: boolean;
+  message?: string;
+  data?: T;
+}
 
 export const authApi = {
   async login(data: LoginRequest): Promise<AuthResponse> {
@@ -24,7 +52,7 @@ export const authApi = {
   },
 
   async verifyEmail(token: string): Promise<ApiResponse> {
-    const response = await apiClient.post<ApiResponse>('/auth/verify-email', { token });
+    const response = await apiClient.get<ApiResponse>(`/auth/verify-email?token=${token}`);
     return response.data;
   },
 

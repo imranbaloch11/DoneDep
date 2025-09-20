@@ -9,7 +9,7 @@ import {
   HomeIcon,
   CloudIcon,
   GlobeAltIcon,
-  DatabaseIcon,
+  CircleStackIcon as DatabaseIcon,
   EnvelopeIcon,
   CogIcon,
   UserIcon,
