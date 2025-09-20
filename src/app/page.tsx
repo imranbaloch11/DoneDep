@@ -2,8 +2,20 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-white">
       <header className="bg-blue-600 text-white p-4">
-        <h1 className="text-2xl font-bold">DoneDep</h1>
-        <p className="text-blue-100">Autonomous Deployment Platform</p>
+        <div className="container mx-auto flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-bold">DoneDep</h1>
+            <p className="text-blue-100">Autonomous Deployment Platform</p>
+          </div>
+          <div className="space-x-4">
+            <a href="/login" className="text-white hover:text-blue-200 px-4 py-2 rounded">
+              Login
+            </a>
+            <a href="/register" className="bg-white text-blue-600 px-4 py-2 rounded hover:bg-blue-50">
+              Sign Up
+            </a>
+          </div>
+        </div>
       </header>
       <main className="container mx-auto px-4 py-8">
         <section className="text-center mb-12">
@@ -37,9 +49,9 @@ export default function HomePage() {
             <a href="/register" className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 inline-block">
               Sign Up
             </a>
-            <button className="border border-blue-600 text-blue-600 px-6 py-3 rounded-lg hover:bg-blue-50">
-              Learn More
-            </button>
+            <a href="/login" className="border border-blue-600 text-blue-600 px-6 py-3 rounded-lg hover:bg-blue-50 inline-block">
+              Login
+            </a>
           </div>
         </section>
       </main>

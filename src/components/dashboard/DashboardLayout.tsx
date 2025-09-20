@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/Button';
 import { 
@@ -25,6 +26,7 @@ interface DashboardLayoutProps {
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { user, logout } = useAuth();
+  const pathname = usePathname();
 
   const navigation = [
     { name: 'Overview', href: '/dashboard', icon: HomeIcon, current: true },
@@ -55,25 +57,91 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             </button>
           </div>
           <nav className="flex-1 space-y-1 px-2 py-4">
-            {navigation.map((item) => (
+            <nav className="mt-8 space-y-1">
               <Link
-                key={item.name}
-                href={item.href}
+                href="/dashboard"
                 className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
-                  item.current
+                  pathname === '/dashboard'
                     ? 'bg-primary-100 text-primary-900'
                     : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                 }`}
-                onClick={() => setSidebarOpen(false)}
               >
-                <item.icon
-                  className={`mr-3 h-6 w-6 flex-shrink-0 ${
-                    item.current ? 'text-primary-500' : 'text-gray-400 group-hover:text-gray-500'
-                  }`}
-                />
-                {item.name}
+                <HomeIcon className="mr-3 h-5 w-5" />
+                Overview
               </Link>
-            ))}
+              
+              <Link
+                href="/deployment"
+                className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+                  pathname === '/deployment'
+                    ? 'bg-primary-100 text-primary-900'
+                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                }`}
+              >
+                <RocketLaunchIcon className="mr-3 h-5 w-5" />
+                🚀 Agentic Deploy
+              </Link>
+              
+              <Link
+                href="/deployments"
+                className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+                  pathname === '/deployments'
+                    ? 'bg-primary-100 text-primary-900'
+                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                }`}
+              >
+                <RocketLaunchIcon className="mr-3 h-5 w-5" />
+                Deployments
+              </Link>
+              
+              <Link
+                href="/domains"
+                className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+                  pathname === '/domains'
+                    ? 'bg-primary-100 text-primary-900'
+                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                }`}
+              >
+                <GlobeAltIcon className="mr-3 h-5 w-5" />
+                Domains
+              </Link>
+              
+              <Link
+                href="/databases"
+                className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+                  pathname === '/databases'
+                    ? 'bg-primary-100 text-primary-900'
+                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                }`}
+              >
+                <DatabaseIcon className="mr-3 h-5 w-5" />
+                Databases
+              </Link>
+              
+              <Link
+                href="/email-services"
+                className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+                  pathname === '/email-services'
+                    ? 'bg-primary-100 text-primary-900'
+                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                }`}
+              >
+                <EnvelopeIcon className="mr-3 h-5 w-5" />
+                Email Services
+              </Link>
+              
+              <Link
+                href="/settings"
+                className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+                  pathname === '/settings'
+                    ? 'bg-primary-100 text-primary-900'
+                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                }`}
+              >
+                <CogIcon className="mr-3 h-5 w-5" />
+                Settings
+              </Link>
+            </nav>
           </nav>
           <div className="border-t border-gray-200 p-4">
             <div className="flex items-center">
@@ -110,24 +178,91 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             </Link>
           </div>
           <nav className="flex-1 space-y-1 px-2 py-4">
-            {navigation.map((item) => (
+            <nav className="mt-8 space-y-1">
               <Link
-                key={item.name}
-                href={item.href}
+                href="/dashboard"
                 className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
-                  item.current
+                  pathname === '/dashboard'
                     ? 'bg-primary-100 text-primary-900'
                     : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                 }`}
               >
-                <item.icon
-                  className={`mr-3 h-6 w-6 flex-shrink-0 ${
-                    item.current ? 'text-primary-500' : 'text-gray-400 group-hover:text-gray-500'
-                  }`}
-                />
-                {item.name}
+                <HomeIcon className="mr-3 h-5 w-5" />
+                Overview
               </Link>
-            ))}
+              
+              <Link
+                href="/deployment"
+                className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+                  pathname === '/deployment'
+                    ? 'bg-primary-100 text-primary-900'
+                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                }`}
+              >
+                <RocketLaunchIcon className="mr-3 h-5 w-5" />
+                🚀 Agentic Deploy
+              </Link>
+              
+              <Link
+                href="/deployments"
+                className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+                  pathname === '/deployments'
+                    ? 'bg-primary-100 text-primary-900'
+                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                }`}
+              >
+                <RocketLaunchIcon className="mr-3 h-5 w-5" />
+                Deployments
+              </Link>
+              
+              <Link
+                href="/domains"
+                className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+                  pathname === '/domains'
+                    ? 'bg-primary-100 text-primary-900'
+                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                }`}
+              >
+                <GlobeAltIcon className="mr-3 h-5 w-5" />
+                Domains
+              </Link>
+              
+              <Link
+                href="/databases"
+                className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+                  pathname === '/databases'
+                    ? 'bg-primary-100 text-primary-900'
+                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                }`}
+              >
+                <DatabaseIcon className="mr-3 h-5 w-5" />
+                Databases
+              </Link>
+              
+              <Link
+                href="/email-services"
+                className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+                  pathname === '/email-services'
+                    ? 'bg-primary-100 text-primary-900'
+                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                }`}
+              >
+                <EnvelopeIcon className="mr-3 h-5 w-5" />
+                Email Services
+              </Link>
+              
+              <Link
+                href="/settings"
+                className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${
+                  pathname === '/settings'
+                    ? 'bg-primary-100 text-primary-900'
+                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                }`}
+              >
+                <CogIcon className="mr-3 h-5 w-5" />
+                Settings
+              </Link>
+            </nav>
           </nav>
           <div className="border-t border-gray-200 p-4">
             <div className="flex items-center">
