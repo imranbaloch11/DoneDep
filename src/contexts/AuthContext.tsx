@@ -66,30 +66,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (email: string, password: string) => {
     try {
-      console.log('AuthContext: Starting login process');
       const response = await authApi.login({ email, password });
-      console.log('AuthContext: API response:', response);
       
-      if (response.success && response.data && response.data.user && response.data.token) {
-        console.log('AuthContext: Setting user and token');
-        setUser(response.data.user);
-        tokenStorage.setAccessToken(response.data.token);
-        if (response.data.refreshToken) {
-          tokenStorage.setRefreshToken(response.data.refreshToken);
+      // Handle both response formats from backend
+      const user = response.user || response.data?.user;
+      const token = response.token || response.data?.token;
+      const refreshToken = response.refreshToken || response.data?.refreshToken;
+      
+      if (response.success && user && token) {
+        setUser(user);
+        tokenStorage.setAccessToken(token);
+        if (refreshToken) {
+          tokenStorage.setRefreshToken(refreshToken);
         }
         toast.success('Login successful!');
-        
-        console.log('AuthContext: Redirecting to dashboard');
-        // Force navigation to dashboard
-        setTimeout(() => {
-          console.log('AuthContext: Executing redirect');
-          window.location.href = '/dashboard';
-        }, 500);
+        router.push('/dashboard');
       } else {
         throw new Error(response.message || 'Login failed');
       }
     } catch (error: any) {
-      console.error('AuthContext: Login error:', error);
       const message = error.response?.data?.message || error.message || 'Login failed';
       toast.error(message);
       throw error;

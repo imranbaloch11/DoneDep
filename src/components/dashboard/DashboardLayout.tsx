@@ -17,6 +17,7 @@ import {
   Bars3Icon,
   XMarkIcon,
   ArrowRightOnRectangleIcon,
+  FolderIcon,
 } from '@heroicons/react/24/outline';
 
 interface DashboardLayoutProps {
@@ -29,12 +30,13 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const pathname = usePathname();
 
   const navigation = [
-    { name: 'Overview', href: '/dashboard', icon: HomeIcon, current: true },
-    { name: 'Deployments', href: '/dashboard/deployments', icon: CloudIcon, current: false },
-    { name: 'Domains', href: '/dashboard/domains', icon: GlobeAltIcon, current: false },
-    { name: 'Databases', href: '/dashboard/databases', icon: DatabaseIcon, current: false },
-    { name: 'Email Services', href: '/dashboard/email', icon: EnvelopeIcon, current: false },
-    { name: 'Settings', href: '/dashboard/settings', icon: CogIcon, current: false },
+    { name: 'Overview', href: '/dashboard', icon: HomeIcon, current: pathname === '/dashboard' },
+    { name: '🚀 Agentic Deploy', href: '/deployment', icon: RocketLaunchIcon, current: pathname === '/deployment' },
+    { name: 'Deployments', href: '/dashboard/deployments', icon: CloudIcon, current: pathname === '/dashboard/deployments' },
+    { name: 'Domains', href: '/dashboard/domains', icon: GlobeAltIcon, current: pathname === '/dashboard/domains' },
+    { name: 'Databases', href: '/dashboard/databases', icon: DatabaseIcon, current: pathname === '/dashboard/databases' },
+    { name: 'Email Services', href: '/dashboard/email', icon: EnvelopeIcon, current: pathname === '/dashboard/email' },
+    { name: 'Settings', href: '/dashboard/settings', icon: CogIcon, current: pathname === '/dashboard/settings' },
   ];
 
   return (
@@ -81,6 +83,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 <RocketLaunchIcon className="mr-3 h-5 w-5" />
                 🚀 Agentic Deploy
               </Link>
+              
               
               <Link
                 href="/deployments"
@@ -202,6 +205,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 <RocketLaunchIcon className="mr-3 h-5 w-5" />
                 🚀 Agentic Deploy
               </Link>
+              
               
               <Link
                 href="/deployments"

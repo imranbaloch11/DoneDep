@@ -2,7 +2,7 @@ import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 import { tokenStorage } from '@/utils/tokenStorage';
 import toast from 'react-hot-toast';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 class ApiClient {
   private client: AxiosInstance;
@@ -46,7 +46,7 @@ class ApiClient {
           try {
             const refreshToken = tokenStorage.getRefreshToken();
             if (refreshToken) {
-              const response = await axios.post(`${API_BASE_URL}/auth/refresh-token`, {
+              const response = await axios.post(`${API_BASE_URL}/api/auth/refresh-token`, {
                 refreshToken,
               });
 

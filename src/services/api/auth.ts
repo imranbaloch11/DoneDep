@@ -22,6 +22,9 @@ interface User {
 interface AuthResponse {
   success: boolean;
   message?: string;
+  user?: User;
+  token?: string;
+  refreshToken?: string;
   data?: {
     token?: string;
     refreshToken?: string;
@@ -37,42 +40,42 @@ interface ApiResponse<T = any> {
 
 export const authApi = {
   async login(data: LoginRequest): Promise<AuthResponse> {
-    const response = await apiClient.post<AuthResponse>('/auth/login', data);
+    const response = await apiClient.post<AuthResponse>('/api/auth/login', data);
     return response.data;
   },
 
   async register(data: RegisterRequest): Promise<AuthResponse> {
-    const response = await apiClient.post<AuthResponse>('/auth/register', data);
+    const response = await apiClient.post<AuthResponse>('/api/auth/register', data);
     return response.data;
   },
 
   async logout(): Promise<ApiResponse> {
-    const response = await apiClient.post<ApiResponse>('/auth/logout');
+    const response = await apiClient.post<ApiResponse>('/api/auth/logout');
     return response.data;
   },
 
   async verifyEmail(token: string): Promise<ApiResponse> {
-    const response = await apiClient.get<ApiResponse>(`/auth/verify-email?token=${token}`);
+    const response = await apiClient.get<ApiResponse>(`/api/auth/verify-email?token=${token}`);
     return response.data;
   },
 
   async forgotPassword(email: string): Promise<ApiResponse> {
-    const response = await apiClient.post<ApiResponse>('/auth/forgot-password', { email });
+    const response = await apiClient.post<ApiResponse>('/api/auth/forgot-password', { email });
     return response.data;
   },
 
   async resetPassword(token: string, password: string): Promise<ApiResponse> {
-    const response = await apiClient.post<ApiResponse>('/auth/reset-password', { token, password });
+    const response = await apiClient.post<ApiResponse>('/api/auth/reset-password', { token, password });
     return response.data;
   },
 
   async refreshToken(refreshToken: string): Promise<AuthResponse> {
-    const response = await apiClient.post<AuthResponse>('/auth/refresh-token', { refreshToken });
+    const response = await apiClient.post<AuthResponse>('/api/auth/refresh-token', { refreshToken });
     return response.data;
   },
 
   async getProfile(): Promise<ApiResponse<User>> {
-    const response = await apiClient.get<ApiResponse<User>>('/auth/me');
+    const response = await apiClient.get<ApiResponse<User>>('/api/auth/me');
     return response.data;
   },
 };

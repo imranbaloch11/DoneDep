@@ -56,7 +56,7 @@ const VisualDeploymentInterface: React.FC = () => {
     {
       id: '1',
       type: 'agent',
-      content: "Hi! I'm your intelligent deployment assistant. Let's get your project deployed! First, let's connect your GitHub repositories.",
+      content: "Hi! I'm your intelligent deployment assistant. Let's get your project deployed! First, let's connect your GitHub projects.",
       timestamp: new Date(),
       actions: [
         { label: 'Connect GitHub', action: 'connect_github', variant: 'primary' },
@@ -69,7 +69,7 @@ const VisualDeploymentInterface: React.FC = () => {
   const [inputMessage, setInputMessage] = useState('');
   const [isGitHubConnected, setIsGitHubConnected] = useState(false);
   const [selectedRepo, setSelectedRepo] = useState('');
-  const [repositories, setRepositories] = useState<any[]>([]);
+  const [connectedRepos, setConnectedRepos] = useState<any[]>([]);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [sessionId, setSessionId] = useState<string>('');
@@ -96,7 +96,7 @@ const VisualDeploymentInterface: React.FC = () => {
 
   const handleConnectGitHub = () => {
     setIsGitHubConnected(true);
-    setRepositories([
+    setConnectedRepos([
       { id: 1, name: 'my-app', language: 'React' },
       { id: 2, name: 'backend-api', language: 'Node.js' }
     ]);
@@ -181,7 +181,7 @@ const VisualDeploymentInterface: React.FC = () => {
           const agentResponse: AgentMessage = {
             id: Date.now().toString(),
             type: 'agent',
-            content: "Great! I've connected your GitHub repositories. I can see you have a React frontend and Node.js backend. Let's analyze your project structure and recommend the best deployment strategy.",
+            content: "Great! I've connected your GitHub projects. I can see you have a React frontend and Node.js backend. Let's analyze your project structure and recommend the best deployment strategy.",
             timestamp: new Date(),
             actions: [
               { label: 'Analyze Project', action: 'analyze_project', variant: 'primary' },
@@ -376,7 +376,7 @@ const VisualDeploymentInterface: React.FC = () => {
       const newMessage: AgentMessage = {
         id: Date.now().toString(),
         type: 'agent',
-        content: "Great! I'm connecting to your GitHub account... I can see you have repositories. Let me analyze your project structure.",
+        content: "Great! I'm connecting to your GitHub account... I can see you have projects. Let me analyze your project structure.",
         timestamp: new Date(),
       };
       setMessages(prev => [...prev, newMessage]);
@@ -488,7 +488,7 @@ Now let's set up your database. What type of data will your app store?`,
         technologies: blocks
           .filter(block => block.status === 'connected')
           .map(block => block.details || block.name),
-        repositories: blocks
+        projects: blocks
           .filter(block => ['frontend', 'backend'].includes(block.id) && block.status === 'connected')
           .map(block => ({ type: block.id, name: block.details })),
       };
@@ -603,11 +603,11 @@ Now let's set up your database. What type of data will your app store?`,
 
             {/* GitHub Connection */}
             <div className="bg-white rounded-xl shadow-sm border p-4">
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">Repository Connection</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-3">Project Connection</h3>
               {!isGitHubConnected ? (
                 <div className="text-center py-4">
                   <p className="text-gray-600 mb-4 text-sm">
-                    Hi! I'm your intelligent deployment assistant. Let's get your project deployed! First, let's connect your GitHub repositories.
+                    Hi! I'm your intelligent deployment assistant. Let's get your project deployed! First, let's connect your GitHub projects.
                   </p>
                   <div className="flex justify-center space-x-3">
                     <button
@@ -641,8 +641,8 @@ Now let's set up your database. What type of data will your app store?`,
                     onChange={(e) => setSelectedRepo(e.target.value)}
                     className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                   >
-                    <option value="">Select a repository...</option>
-                    {repositories.map((repo) => (
+                    <option value="">Select a project...</option>
+                    {connectedRepos.map((repo: any) => (
                       <option key={repo.id} value={repo.name}>
                         {repo.name} ({repo.language})
                       </option>
