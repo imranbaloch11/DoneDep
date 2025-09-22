@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Login - DoneDep</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 400px; margin: 50px auto; padding: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+        button { width: 100%; padding: 10px; background: #6366f1; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #5856eb; }
+        .result { margin-top: 20px; padding: 10px; border-radius: 4px; }
+        .success { background: #d1fae5; color: #065f46; }
+        .error { background: #fee2e2; color: #991b1b; }
+        .test-chat { margin-top: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 4px; }
+        .message { margin: 10px 0; padding: 8px; border-radius: 4px; }
+        .user { background: #3b82f6; color: white; text-align: right; }
+        .assistant { background: #f3f4f6; color: #374151; }
+        #chatInput { margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <h1>DoneDep Test Login</h1>
+    
+    <form id="loginForm">
+        <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" id="email" value="finaltest@example.com" required>
+        </div>
+        <div class="form-group">
+            <label for="password">Password:</label>
+            <input type="password" id="password" value="TestPassword123!" required>
+        </div>
+        <button type="submit">Login & Test Chat</button>
+    </form>
+    
+    <div id="result"></div>
+    <div id="chatTest" class="test-chat" style="display: none;">
+        <h3>Chat Test</h3>
+        <div id="messages"></div>
+        <input type="text" id="chatInput" placeholder="Type a message..." style="width: 80%;">
+        <button onclick="sendMessage()" style="width: 18%;">Send</button>
+    </div>
+
+    <script>
+        let authToken = '';
+        let sessionId = '';
+
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const resultDiv = document.getElementById('result');
+            
+            try {
+                // Login
+                const loginResponse = await fetch('http://localhost:3001/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const loginData = await loginResponse.json();
+                console.log('Login response:', loginData);
+                
+                if (loginData.success) {
+                    authToken = loginData.token;
+                    resultDiv.innerHTML = `<div class="success">✅ Login successful! Token: ${authToken.substring(0, 20)}...</div>`;
+                    
+                    // Initialize chat
+                    const chatResponse = await fetch('http://localhost:3001/deployagent/chat/init', {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${authToken}`
+                        }
+                    });
+                    
+                    const chatData = await chatResponse.json();
+                    console.log('Chat init response:', chatData);
+                    
+                    if (chatData.success) {
+                        sessionId = chatData.data.sessionId;
+                        resultDiv.innerHTML += `<div class="success">✅ Chat initialized! Session: ${sessionId}</div>`;
+                        
+                        // Show chat interface
+                        document.getElementById('chatTest').style.display = 'block';
+                        addMessage('assistant', chatData.data.message);
+                    } else {
+                        resultDiv.innerHTML += `<div class="error">❌ Chat init failed: ${chatData.message}</div>`;
+                    }
+                } else {
+                    resultDiv.innerHTML = `<div class="error">❌ Login failed: ${loginData.message}</div>`;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                resultDiv.innerHTML = `<div class="error">❌ Error: ${error.message}</div>`;
+            }
+        });
+
+        function addMessage(role, content) {
+            const messagesDiv = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${role}`;
+            messageDiv.textContent = `${role}: ${content}`;
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            if (!message || !authToken || !sessionId) return;
+            
+            addMessage('user', message);
+            input.value = '';
+            
+            try {
+                const response = await fetch('http://localhost:3001/deployagent/chat/message', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({ message, sessionId })
+                });
+                
+                const data = await response.json();
+                console.log('Chat response:', data);
+                
+                if (data.success) {
+                    addMessage('assistant', data.data.message);
+                } else {
+                    addMessage('error', `Failed: ${data.message}`);
+                }
+            } catch (error) {
+                console.error('Chat error:', error);
+                addMessage('error', `Error: ${error.message}`);
+            }
+        }
+
+        // Allow Enter key to send message
+        document.getElementById('chatInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>

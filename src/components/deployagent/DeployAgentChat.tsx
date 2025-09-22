@@ -2,15 +2,15 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import { Send, Bot, User, Loader2, Code, Terminal, FileText, Zap } from 'lucide-react';
-import { deployMindAPI, ChatMessage, ChatResponse, DeploymentAction } from '../../services/api/deploymind';
+import { deployAgentAPI, ChatMessage, ChatResponse, DeploymentAction } from '../../services/api/deployagent';
 import { toast } from 'react-hot-toast';
 
-interface DeployMindChatProps {
+interface DeployAgentChatProps {
   contextId?: string;
   onContextCreated?: (contextId: string) => void;
 }
 
-export default function DeployMindChat({ contextId, onContextCreated }: DeployMindChatProps) {
+export default function DeployAgentChat({ contextId, onContextCreated }: DeployAgentChatProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -32,36 +32,55 @@ export default function DeployMindChat({ contextId, onContextCreated }: DeployMi
 
   const initializeChat = async () => {
     try {
-      const { sessionId: newSessionId, message } = await deployMindAPI.initializeChat();
+      const { sessionId: newSessionId, message } = await deployAgentAPI.initializeChat();
       setSessionId(newSessionId);
-      setMessages([{
-        role: 'assistant',
+      const initialMessage = {
+        role: 'assistant' as const,
         content: message,
         timestamp: new Date()
-      }]);
+      };
+      setMessages([initialMessage]);
       setIsInitialized(true);
     } catch (error) {
       console.error('Failed to initialize chat:', error);
-      toast.error('Failed to initialize DeployMind chat');
+      // Set fallback message if API fails
+      setMessages([{
+        role: 'assistant',
+        content: 'Hello! I\'m DeployAgent, your intelligent deployment orchestrator. I can help you with infrastructure deployment, CI/CD pipelines, monitoring, and security. What would you like to deploy today?',
+        timestamp: new Date()
+      }]);
+      setIsInitialized(true);
+      toast.error('Failed to initialize DeployAgent chat');
     }
   };
 
   const sendMessage = async () => {
-    if (!input.trim() || isLoading || !sessionId) return;
+    if (!input.trim() || isLoading) return;
 
+    const messageText = input.trim();
     const userMessage: ChatMessage = {
       role: 'user',
-      content: input.trim(),
+      content: messageText,
       timestamp: new Date()
     };
 
-    setMessages(prev => [...prev, userMessage]);
+    console.log('Adding user message:', userMessage);
+    
+    // Clear input first
     setInput('');
+    
+    // Add user message to state
+    setMessages(prevMessages => {
+      const newMessages = [...prevMessages, userMessage];
+      console.log('Messages after adding user message:', newMessages);
+      return newMessages;
+    });
+    
     setIsLoading(true);
 
     try {
-      const response: ChatResponse = await deployMindAPI.sendMessage(
-        userMessage.content,
+      const response: ChatResponse = await deployAgentAPI.sendMessage(
+        messageText,
         sessionId,
         contextId
       );
@@ -72,7 +91,14 @@ export default function DeployMindChat({ contextId, onContextCreated }: DeployMi
         timestamp: new Date()
       };
 
-      setMessages(prev => [...prev, assistantMessage]);
+      console.log('Adding assistant message:', assistantMessage);
+      
+      // Add assistant response
+      setMessages(prevMessages => {
+        const newMessages = [...prevMessages, assistantMessage];
+        console.log('Messages after adding assistant message:', newMessages);
+        return newMessages;
+      });
 
       // If a new context was created, notify parent
       if (response.contextId && !contextId && onContextCreated) {
@@ -85,7 +111,21 @@ export default function DeployMindChat({ contextId, onContextCreated }: DeployMi
       }
     } catch (error) {
       console.error('Failed to send message:', error);
-      toast.error('Failed to send message to DeployMind');
+      
+      // Add error message
+      const errorMessage: ChatMessage = {
+        role: 'assistant',
+        content: 'Sorry, I encountered an error processing your message. Please try again.',
+        timestamp: new Date()
+      };
+      
+      setMessages(prevMessages => {
+        const newMessages = [...prevMessages, errorMessage];
+        console.log('Messages after adding error message:', newMessages);
+        return newMessages;
+      });
+      
+      toast.error('Failed to send message to DeployAgent');
     } finally {
       setIsLoading(false);
     }
@@ -102,7 +142,7 @@ export default function DeployMindChat({ contextId, onContextCreated }: DeployMi
     const isUser = message.role === 'user';
     
     return (
-      <div key={index} className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4`}>
+      <div key={`msg-${index}-${message.timestamp.getTime()}`} className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4`}>
         <div className={`flex max-w-[80%] ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
           <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
             isUser ? 'bg-blue-500 ml-2' : 'bg-purple-500 mr-2'
@@ -156,7 +196,7 @@ export default function DeployMindChat({ contextId, onContextCreated }: DeployMi
       <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <Loader2 className="animate-spin mx-auto mb-4" size={32} />
-          <p className="text-gray-600">Initializing DeployMind...</p>
+          <p className="text-gray-600">Initializing DeployAgent...</p>
         </div>
       </div>
     );
@@ -170,7 +210,7 @@ export default function DeployMindChat({ contextId, onContextCreated }: DeployMi
           <Bot size={20} />
         </div>
         <div>
-          <h3 className="font-semibold">DeployMind</h3>
+          <h3 className="font-semibold">DeployAgent</h3>
           <p className="text-sm opacity-90">Intelligent Deployment Orchestrator</p>
         </div>
         <div className="ml-auto flex gap-2">
@@ -182,23 +222,58 @@ export default function DeployMindChat({ contextId, onContextCreated }: DeployMi
       </div>
 
       {/* Messages */}
-      <div className="flex-1 p-4 overflow-y-auto max-h-96">
-        {messages.map((message, index) => renderMessage(message, index))}
-        {isLoading && (
-          <div className="flex justify-start mb-4">
-            <div className="flex">
-              <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center mr-2">
-                <Bot size={16} className="text-white" />
-              </div>
-              <div className="bg-gray-100 px-4 py-2 rounded-lg border">
-                <div className="flex items-center gap-2">
-                  <Loader2 className="animate-spin" size={16} />
-                  <span className="text-gray-600">DeployMind is thinking...</span>
+      <div className="flex-1 p-4 overflow-y-auto min-h-96 max-h-96">
+        <div className="space-y-4">
+          <div className="text-xs text-gray-400 p-2 bg-gray-50 rounded">
+            Debug: {messages.length} messages | Session: {sessionId || 'none'} | Initialized: {isInitialized ? 'yes' : 'no'}
+          </div>
+          {messages.length === 0 ? (
+            <div className="text-center text-gray-500 py-8">
+              <Bot size={48} className="mx-auto mb-4 text-gray-300" />
+              <p>No messages yet. Start a conversation!</p>
+            </div>
+          ) : (
+            messages.map((message, index) => {
+              console.log('Rendering message at index', index, ':', message);
+              return (
+                <div key={`message-${index}-${message.timestamp.getTime()}`} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} mb-4`}>
+                  <div className={`flex max-w-[80%] ${message.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
+                    <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
+                      message.role === 'user' ? 'bg-blue-500 ml-2' : 'bg-purple-500 mr-2'
+                    }`}>
+                      {message.role === 'user' ? <User size={16} className="text-white" /> : <Bot size={16} className="text-white" />}
+                    </div>
+                    <div className={`px-4 py-2 rounded-lg ${
+                      message.role === 'user' 
+                        ? 'bg-blue-500 text-white' 
+                        : 'bg-gray-100 text-gray-800 border'
+                    }`}>
+                      <div className="whitespace-pre-wrap">{message.content}</div>
+                      <div className={`text-xs mt-1 ${message.role === 'user' ? 'text-blue-100' : 'text-gray-500'}`}>
+                        {new Date(message.timestamp).toLocaleTimeString()}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          )}
+          {isLoading && (
+            <div className="flex justify-start mb-4">
+              <div className="flex">
+                <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center mr-2">
+                  <Bot size={16} className="text-white" />
+                </div>
+                <div className="bg-gray-100 px-4 py-2 rounded-lg border">
+                  <div className="flex items-center gap-2">
+                    <Loader2 className="animate-spin" size={16} />
+                    <span className="text-gray-600">DeployAgent is thinking...</span>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
+        </div>
         <div ref={messagesEndRef} />
       </div>
 
@@ -209,7 +284,7 @@ export default function DeployMindChat({ contextId, onContextCreated }: DeployMi
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Ask DeployMind about your deployment needs..."
+            placeholder="Ask DeployAgent about your deployment needs..."
             className="flex-1 px-3 py-2 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
             rows={2}
             disabled={isLoading}

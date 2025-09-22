@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { GitBranch, Globe, Database, Shield, Zap, DollarSign, Clock, AlertTriangle } from 'lucide-react';
-import { deployMindAPI, DeploymentRepository, DeploymentRequirements, ProjectAnalysis } from '../../services/api/deploymind';
+import { deployAgentAPI, DeploymentRepository, DeploymentRequirements, ProjectAnalysis } from '../../services/api/deployagent';
 import { toast } from 'react-hot-toast';
 
 interface ProjectAnalyzerProps {
@@ -55,7 +55,7 @@ export default function ProjectAnalyzer({ onAnalysisComplete }: ProjectAnalyzerP
 
     setIsAnalyzing(true);
     try {
-      const result = await deployMindAPI.analyzeProject(repository, requirements);
+      const result = await deployAgentAPI.analyzeProject(repository, requirements);
       setAnalysis(result);
       onAnalysisComplete?.(result);
       toast.success('Project analysis completed!');
