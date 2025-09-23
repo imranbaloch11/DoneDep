@@ -59,7 +59,7 @@ class ApiClient {
           } catch (refreshError) {
             console.error('Token refresh failed:', refreshError);
             tokenStorage.clearTokens();
-            window.location.href = '/login';
+            window.location.href = '/dashboard';
             return Promise.reject(refreshError);
           }
         }

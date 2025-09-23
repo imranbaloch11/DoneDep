@@ -20,7 +20,7 @@ export default function VerifyEmailPage() {
   const [hasVerified, setHasVerified] = useState(false);
   const searchParams = useSearchParams();
   const router = useRouter();
-  const token = searchParams.get('token');
+  const token = searchParams?.get('token');
 
   useEffect(() => {
     const verifyEmail = async () => {
@@ -153,8 +153,8 @@ export default function VerifyEmailPage() {
                   Resend Verification Email
                 </Button>
                 <Button asChild variant="outline" className="w-full">
-                  <Link href="/login">
-                    Back to Sign In
+                  <Link href="/dashboard">
+                    Go to Dashboard
                   </Link>
                 </Button>
               </div>

@@ -1,25 +1,14 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Bot, GitBranch, BarChart3, Settings, History } from 'lucide-react';
 import DeployAgentChatNew from '../../components/deployagent/DeployAgentChatNew';
 import ArchitectureVisualizer from '../../components/deployagent/ArchitectureVisualizer';
 import ProjectAnalyzer from '../../components/deployagent/ProjectAnalyzer';
 import { ProjectAnalysis } from '../../services/api/deployagent';
-import { useAuth } from '../../contexts/AuthContext';
-import { useRouter } from 'next/navigation';
-
 export default function DeployAgentPage() {
   const [activeTab, setActiveTab] = useState<'chat' | 'analyze' | 'deployments' | 'settings'>('chat');
   const [currentContextId, setCurrentContextId] = useState<string | undefined>();
-  const { isAuthenticated, isLoading } = useAuth();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.push('/auth/login');
-    }
-  }, [isAuthenticated, isLoading, router]);
 
   const handleContextCreated = (contextId: string) => {
     setCurrentContextId(contextId);
@@ -28,21 +17,6 @@ export default function DeployAgentPage() {
   const handleAnalysisComplete = (analysis: ProjectAnalysis) => {
     console.log('Analysis completed:', analysis);
   };
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading DeployAgent...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return null;
-  }
 
   const tabs = [
     { id: 'chat', label: 'Chat', icon: Bot },
@@ -53,44 +27,66 @@ export default function DeployAgentPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">DeployAgent</h1>
-              <p className="text-gray-600">AI-Powered Deployment Assistant</p>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2 text-sm text-gray-500">
-                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                <span>AI Agent Active</span>
-              </div>
-            </div>
+      {/* Sidebar */}
+      <div className="fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg">
+        <div className="flex h-full flex-col">
+          {/* Logo */}
+          <div className="flex h-16 items-center px-4 border-b border-gray-200">
+            <Bot className="h-8 w-8 text-purple-600 mr-3" />
+            <span className="text-xl font-bold text-gray-900">DoneDep</span>
           </div>
-          
-          {/* Tabs */}
-          <div className="flex space-x-8 border-b border-gray-200">
+
+          {/* Navigation */}
+          <nav className="flex-1 space-y-1 px-2 py-4">
             {tabs.map((tab) => {
               const Icon = tab.icon;
               return (
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as any)}
-                  className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
+                  className={`w-full flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors ${
                     activeTab === tab.id
-                      ? 'border-purple-500 text-purple-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      ? 'bg-purple-100 text-purple-900'
+                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                   }`}
                 >
-                  <Icon size={16} />
+                  <Icon className="mr-3 h-5 w-5" />
                   {tab.label}
                 </button>
               );
             })}
+          </nav>
+
+          {/* Status section */}
+          <div className="border-t border-gray-200 p-4">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <div className="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center">
+                  <div className="w-3 h-3 bg-green-400 rounded-full"></div>
+                </div>
+              </div>
+              <div className="ml-3">
+                <p className="text-sm font-medium text-gray-700">AI Agent</p>
+                <p className="text-xs text-gray-500">Active & Ready</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
+
+      {/* Main content */}
+      <div className="pl-64">
+        {/* Top bar */}
+        <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
+          <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
+            <div className="flex flex-1">
+              <h1 className="text-2xl font-bold text-gray-900">Agentic Deploy</h1>
+            </div>
+            <div className="flex items-center gap-x-4 lg:gap-x-6">
+              <span className="text-sm text-gray-700">AI-Powered Deployment Assistant</span>
+            </div>
+          </div>
+        </div>
 
       {/* Content */}
       <div className="h-[calc(100vh-140px)]">
@@ -138,6 +134,7 @@ export default function DeployAgentPage() {
             </div>
           </div>
         )}
+      </div>
       </div>
     </div>
   );

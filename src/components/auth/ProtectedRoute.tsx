@@ -15,7 +15,8 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      router.push('/login');
+      // Since login is removed, redirect to dashboard directly
+      router.push('/dashboard');
     }
   }, [isAuthenticated, isLoading, router]);
 

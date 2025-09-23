@@ -302,10 +302,10 @@ export default function RegisterPage() {
           <p className="text-sm text-gray-600">
             Already have an account?{' '}
             <Link
-              href="/login"
+              href="/dashboard"
               className="font-medium text-primary-600 hover:text-primary-500"
             >
-              Sign in
+              Go to Dashboard
             </Link>
           </p>
         </motion.div>

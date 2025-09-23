@@ -29,6 +29,12 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   const { user, logout } = useAuth();
   const pathname = usePathname();
 
+  // Mock user data when no authentication
+  const displayUser = user || {
+    name: 'Demo User',
+    email: 'demo@donedep.com'
+  };
+
   const navigation = [
     { name: 'Overview', href: '/dashboard', icon: HomeIcon, current: pathname === '/dashboard' },
     { name: '🚀 Agentic Deploy', href: '/deployment', icon: RocketLaunchIcon, current: pathname === '/deployment' },
@@ -310,7 +316,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             <div className="flex items-center gap-x-4 lg:gap-x-6">
               <div className="hidden lg:block lg:h-6 lg:w-px lg:bg-gray-200" />
               <div className="flex items-center gap-x-4">
-                <span className="text-sm text-gray-700">Welcome back, {user?.name}</span>
+                <span className="text-sm text-gray-700">Welcome back, {displayUser.name}</span>
               </div>
             </div>
           </div>

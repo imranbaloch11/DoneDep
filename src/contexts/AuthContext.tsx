@@ -97,7 +97,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       if (response.success) {
         toast.success('Registration successful! Please check your email to verify your account.');
-        router.push('/login?message=Please check your email to verify your account');
+        router.push('/dashboard');
       } else {
         throw new Error(response.message || 'Registration failed');
       }

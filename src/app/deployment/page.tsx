@@ -1,25 +1,14 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Bot, GitBranch, BarChart3, Settings, History } from 'lucide-react';
 import DeployAgentChatNew from '../../components/deployagent/DeployAgentChatNew';
 import ArchitectureVisualizer from '../../components/deployagent/ArchitectureVisualizer';
 import ProjectAnalyzer from '../../components/deployagent/ProjectAnalyzer';
 import { ProjectAnalysis } from '../../services/api/deployagent';
-import { useAuth } from '../../contexts/AuthContext';
-import { useRouter } from 'next/navigation';
-
 export default function DeploymentPage() {
   const [activeTab, setActiveTab] = useState<'chat' | 'analyze' | 'deployments' | 'settings'>('chat');
   const [currentContextId, setCurrentContextId] = useState<string | undefined>();
-  const { isAuthenticated, isLoading } = useAuth();
-  const router = useRouter();
-
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.push('/auth/login');
-    }
-  }, [isAuthenticated, isLoading, router]);
 
   const handleContextCreated = (contextId: string) => {
     setCurrentContextId(contextId);
@@ -28,21 +17,6 @@ export default function DeploymentPage() {
   const handleAnalysisComplete = (analysis: ProjectAnalysis) => {
     console.log('Analysis completed:', analysis);
   };
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading DeployAgent...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return null;
-  }
 
   const tabs = [
     { id: 'chat', label: 'Chat', icon: Bot },

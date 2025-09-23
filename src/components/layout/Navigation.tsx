@@ -11,7 +11,7 @@ export default function Navigation() {
   const { user, logout } = useAuth();
 
   // Don't show navigation on auth pages and landing page
-  if (pathname === '/login' || pathname === '/register' || pathname === '/verify-email' || pathname === '/') {
+  if (pathname === '/register' || pathname === '/verify-email' || pathname === '/') {
     return null;
   }
 
@@ -71,12 +71,6 @@ export default function Navigation() {
 
             {!user && (
               <div className="flex items-center gap-2">
-                <Link
-                  href="/login"
-                  className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900 transition-colors"
-                >
-                  Login
-                </Link>
                 <Link
                   href="/register"
                   className="px-4 py-2 bg-purple-600 text-white text-sm rounded-lg hover:bg-purple-700 transition-colors"
