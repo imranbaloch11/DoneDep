@@ -1,10 +1,11 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, Bot, User, Loader2, Github, Rocket, Globe } from 'lucide-react';
+import { Send, Bot, User, Loader2, Github, Rocket, Globe, BarChart3 } from 'lucide-react';
 import { deployAgentAPI, ChatMessage, ChatResponse } from '../../services/api/deployagent';
 import { toast } from 'react-hot-toast';
-import GitHubConnectModal from './GitHubConnectModal';
+import GitHubConnectModalEnhanced from './GitHubConnectModalEnhanced';
+import DeploymentArchitectureDashboard from './DeploymentArchitectureDashboard';
 
 interface DeployAgentChatNewProps {
   contextId?: string;
@@ -20,6 +21,8 @@ export default function DeployAgentChatNew({ contextId, onContextCreated }: Depl
   const [showGitHubModal, setShowGitHubModal] = useState(false);
   const [selectedRepository, setSelectedRepository] = useState<any>(null);
   const [actions, setActions] = useState<any[]>([]);
+  const [showDeploymentDashboard, setShowDeploymentDashboard] = useState(false);
+  const [deploymentProjectId, setDeploymentProjectId] = useState<string>('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -125,10 +128,23 @@ export default function DeployAgentChatNew({ contextId, onContextCreated }: Depl
         break;
       case 'start_deployment':
         if (selectedRepository) {
-          sendMessage();
+          // Generate project ID and show deployment dashboard
+          const projectId = `${selectedRepository.name}-${Date.now()}`;
+          setDeploymentProjectId(projectId);
+          setShowDeploymentDashboard(true);
+          
+          // Also send message to AI
           setInput(`Start deployment for ${selectedRepository.name}`);
+          sendMessage();
         } else {
           toast.error('Please connect a GitHub repository first');
+        }
+        break;
+      case 'view_deployment':
+        if (deploymentProjectId) {
+          setShowDeploymentDashboard(true);
+        } else {
+          toast.error('No deployment found. Please start a deployment first.');
         }
         break;
       case 'domain_setup':
@@ -229,6 +245,65 @@ export default function DeployAgentChatNew({ contextId, onContextCreated }: Depl
                 </div>
               ))}
               
+              {/* Action Buttons */}
+              {(actions.length > 0 || selectedRepository) && (
+                <div className="mb-4 flex flex-wrap gap-2">
+                  {actions.map((action, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handleAction(action)}
+                      className="flex items-center px-3 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors text-sm"
+                    >
+                      {action.type === 'github_connect' && <Github className="w-4 h-4 mr-2" />}
+                      {action.type === 'start_deployment' && <Rocket className="w-4 h-4 mr-2" />}
+                      {action.type === 'domain_setup' && <Globe className="w-4 h-4 mr-2" />}
+                      {action.label}
+                    </button>
+                  ))}
+                  
+                  {/* Additional action buttons when repository is connected */}
+                  {selectedRepository && (
+                    <>
+                      <button
+                        onClick={() => handleAction({ type: 'start_deployment', label: 'Start Deployment' })}
+                        className="flex items-center px-3 py-2 bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors text-sm"
+                      >
+                        <Rocket className="w-4 h-4 mr-2" />
+                        Start Deployment
+                      </button>
+                      
+                      {deploymentProjectId && (
+                        <button
+                          onClick={() => handleAction({ type: 'view_deployment', label: 'View Dashboard' })}
+                          className="flex items-center px-3 py-2 bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors text-sm"
+                        >
+                          <BarChart3 className="w-4 h-4 mr-2" />
+                          View Dashboard
+                        </button>
+                      )}
+                    </>
+                  )}
+                  
+                  {/* Test button to show dashboard directly */}
+                  <button
+                    onClick={() => {
+                      const testProjectId = `test-project-${Date.now()}`;
+                      setDeploymentProjectId(testProjectId);
+                      setShowDeploymentDashboard(true);
+                      setSelectedRepository({
+                        name: 'test-repo',
+                        clone_url: 'https://github.com/test/test-repo.git',
+                        full_name: 'test/test-repo'
+                      });
+                    }}
+                    className="flex items-center px-3 py-2 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors text-sm"
+                  >
+                    <BarChart3 className="w-4 h-4 mr-2" />
+                    Test Dashboard
+                  </button>
+                </div>
+              )}
+
               {isLoading && (
                 <div className="flex justify-start">
                   <div className="flex gap-3">
@@ -275,27 +350,25 @@ export default function DeployAgentChatNew({ contextId, onContextCreated }: Depl
         </div>
       )}
 
-      {/* Action Buttons */}
-      {actions.length > 0 && (
-        <div className="flex-shrink-0 px-4 py-3 bg-gray-50 border-t border-gray-200">
-          <div className="flex items-center gap-2 mb-2">
-            <Rocket className="h-4 w-4 text-purple-600" />
-            <span className="text-sm font-medium text-gray-700">Quick Actions</span>
+      {/* Deployment Dashboard */}
+      {showDeploymentDashboard && selectedRepository && deploymentProjectId && (
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-gray-900">Deployment Dashboard</h3>
+            <button
+              onClick={() => setShowDeploymentDashboard(false)}
+              className="text-gray-400 hover:text-gray-600"
+            >
+              ✕
+            </button>
           </div>
-          <div className="flex flex-wrap gap-2">
-            {actions.map((action, index) => (
-              <button
-                key={index}
-                onClick={() => handleAction(action)}
-                className="inline-flex items-center gap-2 px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-purple-300 transition-colors"
-              >
-                {action.type === 'github_connect' && <Github className="h-4 w-4" />}
-                {action.type === 'start_deployment' && <Rocket className="h-4 w-4" />}
-                {action.type === 'domain_setup' && <Globe className="h-4 w-4" />}
-                {action.content}
-              </button>
-            ))}
-          </div>
+          <DeploymentArchitectureDashboard
+            projectId={deploymentProjectId}
+            repositoryUrl={selectedRepository.clone_url}
+            onDeploymentCreated={(deployment) => {
+              console.log('Deployment created:', deployment);
+            }}
+          />
         </div>
       )}
 
@@ -329,7 +402,7 @@ export default function DeployAgentChatNew({ contextId, onContextCreated }: Depl
       </div>
 
       {/* GitHub Connect Modal */}
-      <GitHubConnectModal
+      <GitHubConnectModalEnhanced
         isOpen={showGitHubModal}
         onClose={() => setShowGitHubModal(false)}
         onRepositorySelect={handleRepositorySelect}

@@ -5,6 +5,7 @@ import { Bot, GitBranch, BarChart3, Settings, History } from 'lucide-react';
 import DeployAgentChatNew from '../../components/deployagent/DeployAgentChatNew';
 import ArchitectureVisualizer from '../../components/deployagent/ArchitectureVisualizer';
 import ProjectAnalyzer from '../../components/deployagent/ProjectAnalyzer';
+import LocalEnvironmentMonitor from '../../components/deployagent/LocalEnvironmentMonitor';
 import { ProjectAnalysis } from '../../services/api/deployagent';
 export default function DeployAgentPage() {
   const [activeTab, setActiveTab] = useState<'chat' | 'analyze' | 'deployments' | 'settings'>('chat');
@@ -92,8 +93,15 @@ export default function DeployAgentPage() {
       <div className="h-[calc(100vh-140px)]">
         {activeTab === 'chat' && (
           <div className="h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
-              {/* Left Side - Architecture Visualizer */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
+              {/* Left Side - Local Environment Monitor */}
+              <div className="h-full">
+                <LocalEnvironmentMonitor 
+                  onApplicationSelect={(app) => console.log('Selected app:', app)}
+                />
+              </div>
+              
+              {/* Middle - Architecture Visualizer */}
               <div className="h-full">
                 <ArchitectureVisualizer />
               </div>

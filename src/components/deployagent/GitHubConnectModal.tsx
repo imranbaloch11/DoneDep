@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { X, Github, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
+import { X, Github, Loader2, Search, Star, GitBranch, Calendar, ExternalLink, Zap, CheckCircle, AlertCircle, Clock } from 'lucide-react';
 import { githubApi } from '../../services/api/github';
+import { githubEnhancedAPI, EnhancedRepository, DeploymentRecommendation, getFrameworkIcon, getDeploymentReadinessColor, getPlatformIcon } from '../../services/api/github-enhanced';
 import { toast } from 'react-hot-toast';
 
 interface Repository {
@@ -37,10 +38,15 @@ export default function GitHubConnectModal({
   const [step, setStep] = useState<'auth' | 'repos' | 'analysis'>('auth');
   const [isLoading, setIsLoading] = useState(false);
   const [accessToken, setAccessToken] = useState('');
+  const [repositories, setRepositories] = useState<EnhancedRepository[]>([]);
+  const [filteredRepositories, setFilteredRepositories] = useState<EnhancedRepository[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedRepo, setSelectedRepo] = useState<EnhancedRepository | null>(null);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [recommendations, setRecommendations] = useState<DeploymentRecommendation[]>([]);
+  const [repositorySummary, setRepositorySummary] = useState<any>(null);
+  const [activeTab, setActiveTab] = useState<'repositories' | 'recommendations' | 'summary'>('repositories');
   const [user, setUser] = useState<GitHubUser | null>(null);
-  const [repositories, setRepositories] = useState<Repository[]>([]);
-  const [selectedRepo, setSelectedRepo] = useState<Repository | null>(null);
-  const [analysis, setAnalysis] = useState<any>(null);
 
   useEffect(() => {
     if (!isOpen) {

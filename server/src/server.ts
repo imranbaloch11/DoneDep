@@ -17,6 +17,9 @@ import githubRoutes from './routes/github';
 import testDeployRoutes from './routes/testDeploy';
 import windsurfRoutes from './routes/windsurf';
 import domainRoutes from './routes/domains';
+import deploymentRoutes from './routes/deployment';
+import githubEnhancedRoutes from './routes/github-enhanced';
+import localMonitorRoutes from './routes/local-monitor';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -46,6 +49,9 @@ app.use('/github', githubRoutes);
 app.use('/test-deploy', testDeployRoutes);
 app.use('/windsurf', windsurfRoutes);
 app.use('/domains', domainRoutes);
+app.use('/deployment', deploymentRoutes);
+app.use('/github-enhanced', githubEnhancedRoutes);
+app.use('/local-monitor', localMonitorRoutes);
 
 // Error handling middleware
 app.use(errorHandler);
