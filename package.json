@@ -4,7 +4,7 @@
   "private": true,
   "description": "DoneDep Frontend - Autonomous Deployment Platform",
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev -p 3000",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
@@ -14,7 +14,6 @@
     "test:coverage": "jest --coverage"
   },
   "dependencies": {
-    "@donedep/shared": "file:../shared",
     "@headlessui/react": "^1.7.17",
     "@heroicons/react": "^2.0.18",
     "@radix-ui/react-slot": "^1.0.2",

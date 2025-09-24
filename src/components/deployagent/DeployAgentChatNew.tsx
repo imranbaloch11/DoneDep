@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Send, Bot, User, Loader2 } from 'lucide-react';
+import { Send, Bot, User, Loader2, Github, Rocket, Globe } from 'lucide-react';
 import { deployAgentAPI, ChatMessage, ChatResponse } from '../../services/api/deployagent';
 import { toast } from 'react-hot-toast';
+import GitHubConnectModal from './GitHubConnectModal';
 
 interface DeployAgentChatNewProps {
   contextId?: string;
@@ -16,6 +17,9 @@ export default function DeployAgentChatNew({ contextId, onContextCreated }: Depl
   const [isLoading, setIsLoading] = useState(false);
   const [sessionId, setSessionId] = useState<string>('');
   const [isInitialized, setIsInitialized] = useState(false);
+  const [showGitHubModal, setShowGitHubModal] = useState(false);
+  const [selectedRepository, setSelectedRepository] = useState<any>(null);
+  const [actions, setActions] = useState<any[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -88,6 +92,7 @@ export default function DeployAgentChatNew({ contextId, onContextCreated }: Depl
       }
 
       if (response.actions && response.actions.length > 0) {
+        setActions(response.actions);
         toast.success(`Generated ${response.actions.length} deployment actions`);
       }
     } catch (error) {
@@ -111,6 +116,45 @@ export default function DeployAgentChatNew({ contextId, onContextCreated }: Depl
       e.preventDefault();
       sendMessage();
     }
+  };
+
+  const handleAction = (action: any) => {
+    switch (action.type) {
+      case 'github_connect':
+        setShowGitHubModal(true);
+        break;
+      case 'start_deployment':
+        if (selectedRepository) {
+          sendMessage();
+          setInput(`Start deployment for ${selectedRepository.name}`);
+        } else {
+          toast.error('Please connect a GitHub repository first');
+        }
+        break;
+      case 'domain_setup':
+        setInput('Help me set up a domain for my project');
+        sendMessage();
+        break;
+      default:
+        console.log('Unknown action:', action);
+    }
+  };
+
+  const handleRepositorySelect = (repository: any) => {
+    setSelectedRepository(repository);
+    setShowGitHubModal(false);
+    
+    // Send a message about the selected repository
+    const repoMessage = `I've connected the repository "${repository.name}". It's a ${repository.language} project. What would you like to do with it?`;
+    
+    const assistantMessage: ChatMessage = {
+      role: 'assistant',
+      content: repoMessage,
+      timestamp: new Date()
+    };
+    
+    setMessages(prev => [...prev, assistantMessage]);
+    toast.success(`Connected repository: ${repository.name}`);
   };
 
   return (
@@ -206,6 +250,55 @@ export default function DeployAgentChatNew({ contextId, onContextCreated }: Depl
         </div>
       </div>
 
+      {/* Repository Status */}
+      {selectedRepository && (
+        <div className="flex-shrink-0 px-4 py-3 bg-blue-50 border-t border-blue-200">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Github className="h-4 w-4 text-blue-600" />
+              <div>
+                <p className="text-sm font-medium text-blue-900">
+                  Connected: {selectedRepository.name}
+                </p>
+                <p className="text-xs text-blue-700">
+                  {selectedRepository.language} • {selectedRepository.full_name}
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => setSelectedRepository(null)}
+              className="text-blue-600 hover:text-blue-800 text-xs"
+            >
+              Disconnect
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Action Buttons */}
+      {actions.length > 0 && (
+        <div className="flex-shrink-0 px-4 py-3 bg-gray-50 border-t border-gray-200">
+          <div className="flex items-center gap-2 mb-2">
+            <Rocket className="h-4 w-4 text-purple-600" />
+            <span className="text-sm font-medium text-gray-700">Quick Actions</span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {actions.map((action, index) => (
+              <button
+                key={index}
+                onClick={() => handleAction(action)}
+                className="inline-flex items-center gap-2 px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-purple-300 transition-colors"
+              >
+                {action.type === 'github_connect' && <Github className="h-4 w-4" />}
+                {action.type === 'start_deployment' && <Rocket className="h-4 w-4" />}
+                {action.type === 'domain_setup' && <Globe className="h-4 w-4" />}
+                {action.content}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Input Area */}
       <div className="flex-shrink-0 p-4 border-t border-gray-200 bg-gray-50">
         <div className="flex gap-3">
@@ -234,6 +327,13 @@ export default function DeployAgentChatNew({ contextId, onContextCreated }: Depl
           </button>
         </div>
       </div>
+
+      {/* GitHub Connect Modal */}
+      <GitHubConnectModal
+        isOpen={showGitHubModal}
+        onClose={() => setShowGitHubModal(false)}
+        onRepositorySelect={handleRepositorySelect}
+      />
     </div>
   );
 }

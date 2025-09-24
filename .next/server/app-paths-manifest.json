@@ -1,5 +1,3 @@
 {
-  "/page": "app/page.js",
-  "/deployagent/page": "app/deployagent/page.js",
-  "/deployment/page": "app/deployment/page.js"
+  "/deployagent/page": "app/deployagent/page.js"
 }
