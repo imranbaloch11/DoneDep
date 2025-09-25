@@ -6,9 +6,10 @@ import DeployAgentChatNew from '../../components/deployagent/DeployAgentChatNew'
 import ArchitectureVisualizer from '../../components/deployagent/ArchitectureVisualizer';
 import ProjectAnalyzer from '../../components/deployagent/ProjectAnalyzer';
 import LocalEnvironmentMonitor from '../../components/deployagent/LocalEnvironmentMonitor';
+import ErrorCaptureDashboard from '../../components/deployagent/ErrorCaptureDashboard';
 import { ProjectAnalysis } from '../../services/api/deployagent';
 export default function DeployAgentPage() {
-  const [activeTab, setActiveTab] = useState<'chat' | 'analyze' | 'deployments' | 'settings'>('chat');
+  const [activeTab, setActiveTab] = useState<'local-monitor' | 'error-dashboard' | 'architecture'>('local-monitor');
   const [currentContextId, setCurrentContextId] = useState<string | undefined>();
 
   const handleContextCreated = (contextId: string) => {
@@ -19,7 +20,13 @@ export default function DeployAgentPage() {
     console.log('Analysis completed:', analysis);
   };
 
-  const tabs = [
+  const mainTabs = [
+    { id: 'local-monitor', label: 'Local Environment Monitor' },
+    { id: 'error-dashboard', label: 'Error Capture Dashboard' },
+    { id: 'architecture', label: 'Deployment Architecture' },
+  ];
+
+  const sidebarTabs = [
     { id: 'chat', label: 'Chat', icon: Bot },
     { id: 'analyze', label: 'Analyze', icon: GitBranch },
     { id: 'deployments', label: 'Deployments', icon: BarChart3 },
@@ -39,17 +46,13 @@ export default function DeployAgentPage() {
 
           {/* Navigation */}
           <nav className="flex-1 space-y-1 px-2 py-4">
-            {tabs.map((tab) => {
+            {sidebarTabs.map((tab) => {
               const Icon = tab.icon;
               return (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id as any)}
-                  className={`w-full flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors ${
-                    activeTab === tab.id
-                      ? 'bg-purple-100 text-purple-900'
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                  }`}
+                  onClick={() => {/* Keep for future sidebar functionality */}}
+                  className="w-full flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                 >
                   <Icon className="mr-3 h-5 w-5" />
                   {tab.label}
@@ -77,71 +80,75 @@ export default function DeployAgentPage() {
 
       {/* Main content */}
       <div className="pl-64">
-        {/* Top bar */}
+        {/* Top bar with tab buttons */}
         <div className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-gray-200 bg-white px-4 shadow-sm sm:gap-x-6 sm:px-6 lg:px-8">
           <div className="flex flex-1 gap-x-4 self-stretch lg:gap-x-6">
-            <div className="flex flex-1">
-              <h1 className="text-2xl font-bold text-gray-900">Agentic Deploy</h1>
-            </div>
-            <div className="flex items-center gap-x-4 lg:gap-x-6">
-              <span className="text-sm text-gray-700">AI-Powered Deployment Assistant</span>
+            <div className="flex flex-1 items-center">
+              {/* Tab buttons */}
+              <div className="flex space-x-1">
+                {mainTabs.map((tab) => (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id as any)}
+                    className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                      activeTab === tab.id
+                        ? 'bg-purple-100 text-purple-900 border border-purple-200'
+                        : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </div>
 
-      {/* Content */}
+      {/* Content - 2 Half Layout */}
       <div className="h-[calc(100vh-140px)]">
-        {activeTab === 'chat' && (
-          <div className="h-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 h-full">
-              {/* Left Side - Local Environment Monitor */}
-              <div className="h-full">
+        <div className="h-full max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="grid grid-cols-2 gap-6 h-full">
+            
+            {/* Left Half - Dynamic Content Based on Active Tab */}
+            <div className="h-full">
+              {activeTab === 'local-monitor' && (
                 <LocalEnvironmentMonitor 
                   onApplicationSelect={(app) => console.log('Selected app:', app)}
                 />
-              </div>
+              )}
               
-              {/* Middle - Architecture Visualizer */}
-              <div className="h-full">
-                <ArchitectureVisualizer />
-              </div>
-              
-              {/* Right Side - Chat */}
-              <div className="h-full">
-                <DeployAgentChatNew 
-                  contextId={currentContextId}
-                  onContextCreated={handleContextCreated}
+              {activeTab === 'error-dashboard' && (
+                <ErrorCaptureDashboard 
+                  onErrorSelect={(error) => console.log('Selected error:', error)}
                 />
+              )}
+              
+              {activeTab === 'architecture' && (
+                <ArchitectureVisualizer />
+              )}
+            </div>
+            
+            {/* Right Half - Constant AI Chat */}
+            <div className="h-full">
+              <div className="bg-white rounded-lg shadow-sm border border-gray-200 h-full flex flex-col">
+                {/* Chat Header */}
+                <div className="border-b border-gray-200 p-4">
+                  <h2 className="text-lg font-semibold text-gray-900">DeployAgent</h2>
+                  <p className="text-sm text-gray-600">AI Deployment Assistant</p>
+                </div>
+                
+                {/* Chat Content */}
+                <div className="flex-1 min-h-0">
+                  <DeployAgentChatNew 
+                    contextId={currentContextId}
+                    onContextCreated={handleContextCreated}
+                  />
+                </div>
               </div>
             </div>
+            
           </div>
-        )}
-
-        {activeTab === 'analyze' && (
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <ProjectAnalyzer onAnalysisComplete={handleAnalysisComplete} />
-          </div>
-        )}
-
-        {activeTab === 'deployments' && (
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
-              <History size={48} className="mx-auto mb-4 text-gray-300" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Deployment History</h3>
-              <p className="text-gray-600">Your deployment history will appear here.</p>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'settings' && (
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8 text-center">
-              <Settings size={48} className="mx-auto mb-4 text-gray-300" />
-              <h3 className="text-lg font-medium text-gray-900 mb-2">DeployAgent Settings</h3>
-              <p className="text-gray-600">Configure your deployment preferences and integrations.</p>
-            </div>
-          </div>
-        )}
+        </div>
       </div>
       </div>
     </div>

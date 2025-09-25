@@ -20,6 +20,8 @@ import domainRoutes from './routes/domains';
 import deploymentRoutes from './routes/deployment';
 import githubEnhancedRoutes from './routes/github-enhanced';
 import localMonitorRoutes from './routes/local-monitor';
+import errorCaptureRoutes from './routes/error-capture';
+import { WindsurfWebSocketService } from './services/WindsurfWebSocketService';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -52,6 +54,7 @@ app.use('/domains', domainRoutes);
 app.use('/deployment', deploymentRoutes);
 app.use('/github-enhanced', githubEnhancedRoutes);
 app.use('/local-monitor', localMonitorRoutes);
+app.use('/error-capture', errorCaptureRoutes);
 
 // Error handling middleware
 app.use(errorHandler);
@@ -71,13 +74,16 @@ async function startServer() {
     await connectDatabase();
     console.log('✅ Database connected successfully');
 
-    // Start HTTP server
-    app.listen(PORT, () => {
+    // Start server
+    const server = app.listen(PORT, () => {
       console.log(`🚀 DoneDep Backend API running on port ${PORT}`);
       console.log(`📊 Health check: http://localhost:${PORT}/health`);
       console.log(`🌐 Frontend URL: ${process.env.FRONTEND_URL || 'http://localhost:3000'}`);
     });
 
+    // Initialize WebSocket service for Windsurf extension communication
+    const windsurfWebSocket = new WindsurfWebSocketService(server);
+    console.log(`🔌 Windsurf WebSocket service running on ws://localhost:${PORT}/windsurf`);
   } catch (error) {
     console.error('❌ Failed to start server:', error);
     process.exit(1);

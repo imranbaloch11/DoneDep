@@ -1,0 +1,204 @@
+{
+  "name": "donedep-windsurf-extension",
+  "displayName": "DoneDep - Autonomous Deployment Assistant",
+  "description": "Bi-directional integration between DoneDep and Windsurf IDE for autonomous deployment workflows",
+  "version": "1.0.0",
+  "publisher": "donedep",
+  "engines": {
+    "vscode": "^1.74.0"
+  },
+  "categories": [
+    "Other",
+    "Debuggers",
+    "Extension Packs"
+  ],
+  "keywords": [
+    "deployment",
+    "autonomous",
+    "ai",
+    "windsurf",
+    "donedep",
+    "devops",
+    "automation"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "donedep.connect",
+        "title": "Connect to DoneDep",
+        "icon": "$(plug)",
+        "category": "DoneDep"
+      },
+      {
+        "command": "donedep.disconnect",
+        "title": "Disconnect from DoneDep",
+        "icon": "$(debug-disconnect)",
+        "category": "DoneDep"
+      },
+      {
+        "command": "donedep.deploy",
+        "title": "Deploy with DoneDep",
+        "icon": "$(rocket)",
+        "category": "DoneDep"
+      },
+      {
+        "command": "donedep.fixError",
+        "title": "Fix Error with DoneDep AI",
+        "icon": "$(tools)",
+        "category": "DoneDep"
+      },
+      {
+        "command": "donedep.showErrors",
+        "title": "Show DoneDep Error Dashboard",
+        "icon": "$(bug)",
+        "category": "DoneDep"
+      },
+      {
+        "command": "donedep.openSettings",
+        "title": "Open DoneDep Settings",
+        "icon": "$(gear)",
+        "category": "DoneDep"
+      }
+    ],
+    "configuration": {
+      "title": "DoneDep",
+      "properties": {
+        "donedep.serverUrl": {
+          "type": "string",
+          "default": "http://localhost:3001",
+          "description": "DoneDep server URL"
+        },
+        "donedep.autoConnect": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically connect to DoneDep on startup"
+        },
+        "donedep.autoFix": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically apply error fixes"
+        },
+        "donedep.createPRs": {
+          "type": "boolean",
+          "default": true,
+          "description": "Create pull requests for fixes"
+        },
+        "donedep.notifyOnErrors": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show notifications for new errors"
+        },
+        "donedep.enableLogging": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable debug logging"
+        }
+      }
+    },
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "donedep",
+          "title": "DoneDep",
+          "icon": "$(rocket)"
+        }
+      ]
+    },
+    "views": {
+      "donedep": [
+        {
+          "id": "donedep.errorDashboard",
+          "name": "Error Dashboard",
+          "when": "donedep.connected"
+        },
+        {
+          "id": "donedep.deployments",
+          "name": "Deployments",
+          "when": "donedep.connected"
+        },
+        {
+          "id": "donedep.settings",
+          "name": "Settings"
+        }
+      ]
+    },
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "donedep.connect",
+          "when": "!donedep.connected"
+        },
+        {
+          "command": "donedep.disconnect",
+          "when": "donedep.connected"
+        },
+        {
+          "command": "donedep.deploy",
+          "when": "donedep.connected"
+        },
+        {
+          "command": "donedep.fixError",
+          "when": "donedep.connected"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "donedep.fixError",
+          "when": "donedep.connected && editorHasSelection",
+          "group": "donedep"
+        }
+      ]
+    },
+    "statusBarItems": [
+      {
+        "id": "donedep.status",
+        "alignment": "left",
+        "priority": 100
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js",
+    "package": "vsce package",
+    "publish": "vsce publish"
+  },
+  "devDependencies": {
+    "@types/node": "16.x",
+    "@types/vscode": "^1.74.0",
+    "@types/ws": "^8.5.0",
+    "@typescript-eslint/eslint-plugin": "^5.45.0",
+    "@typescript-eslint/parser": "^5.45.0",
+    "@vscode/test-electron": "^2.2.0",
+    "eslint": "^8.28.0",
+    "typescript": "^4.9.4",
+    "vsce": "^2.15.0"
+  },
+  "dependencies": {
+    "axios": "^1.6.0",
+    "socket.io-client": "^4.8.1",
+    "ws": "^8.14.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/imranbaloch11/DoneDep.git"
+  },
+  "bugs": {
+    "url": "https://github.com/imranbaloch11/DoneDep/issues"
+  },
+  "homepage": "https://github.com/imranbaloch11/DoneDep#readme",
+  "license": "MIT",
+  "icon": "resources/icon.png",
+  "galleryBanner": {
+    "color": "#7C3AED",
+    "theme": "dark"
+  }
+}
